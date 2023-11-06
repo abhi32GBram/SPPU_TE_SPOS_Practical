@@ -1,0 +1,89 @@
+import java.util.Scanner;
+
+class LeastRecentlyUsed {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        // Prompt for the number of frames
+        System.out.println("ENTER NUMBER OF FRAMES:");
+        int numFrames = scanner.nextInt();
+        
+        // Prompt for the number of page references
+        System.out.println("ENTER NUMBER OF REFERENCES:");
+        int numReferences = scanner.nextInt();
+        
+        // Arrays to hold the pages and frames
+        int[] pages = new int[numReferences];
+        int[] frames = new int[numFrames];
+        
+        // Input page references
+        System.out.println("ENTER REFERENCE STRING:");
+        for (int i = 0; i < numReferences; i++) {
+            pages[i] = scanner.nextInt();
+        }
+        
+        // Initialize frames to -1 indicating they are empty
+        for (int i = 0; i < numFrames; i++) {
+            frames[i] = -1;
+        }
+        
+        // Variables to track hits, misses and the age of each frame
+        int hitCount = 0, missCount = 0;
+        int[] age = new int[numFrames];
+        
+        // LRU Algorithm Implementation
+        for (int i = 0; i < numReferences; i++) {
+            boolean isHit = false;
+            int oldestFrameIndex = 0;
+            int oldestAge = age[0];
+            
+            // Check if the page is already in one of the frames
+            for (int j = 0; j < numFrames; j++) {
+                if (frames[j] == pages[i]) {
+                    isHit = true;
+                    hitCount++;
+                    age[j] = 0; // Reset age since it's been accessed
+                    break;
+                }
+            }
+            
+            // If it's a miss, we need to replace a frame
+            if (!isHit) {
+                missCount++;
+                
+                // Find the oldest frame
+                for (int j = 0; j < numFrames; j++) {
+                    if (age[j] > oldestAge) {
+                        oldestAge = age[j];
+                        oldestFrameIndex = j;
+                    }
+                }
+                
+                // Replace the oldest frame with the new page
+                frames[oldestFrameIndex] = pages[i];
+                age[oldestFrameIndex] = 0; // Reset age of the new frame
+            }
+            
+            // Age all the other frames
+            for (int j = 0; j < numFrames; j++) {
+                if (frames[j] != -1) {
+                    age[j]++;
+                }
+            }
+            
+            // Print the current state of frames
+            for (int frame : frames) {
+                System.out.print(frame + " ");
+            }
+            System.out.println();
+        }
+        
+        // Calculate and print hit ratio
+        float hitRatio = (float) hitCount / (hitCount + missCount);
+        System.out.println("Hits: " + hitCount + " Misses: " + missCount);
+        System.out.println("Page Replacement Ratio: " + hitRatio);
+        
+        // Close the scanner
+        scanner.close();
+    }
+}

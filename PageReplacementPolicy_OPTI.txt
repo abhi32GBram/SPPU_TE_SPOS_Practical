@@ -1,0 +1,109 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+class OptimalPageReplacement {
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        
+        // Number of frames and reference string length
+        int numFrames, pointer = 0, hits = 0, faults = 0, referenceLength;
+        boolean isBufferFull = false;
+        int[] frameBuffer;
+        int[] referenceString;
+        int[][] memoryLayout;
+
+        // Input the number of frames
+        System.out.println("\nENTER THE NUMBER OF FRAMES: ");
+        numFrames = Integer.parseInt(reader.readLine());
+
+        // Input the length of the reference string
+        System.out.println("\nENTER THE LENGTH OF REFERENCE STRING: ");
+        referenceLength = Integer.parseInt(reader.readLine());
+
+        // Initialize arrays based on input lengths
+        referenceString = new int[referenceLength];
+        memoryLayout = new int[referenceLength][numFrames];
+        frameBuffer = new int[numFrames];
+        for (int j = 0; j < numFrames; j++) {
+            frameBuffer[j] = -1; // Initialize frame buffer to -1 indicating empty
+        }
+
+        // Input the reference string
+        System.out.println("\nENTER THE REFERENCE STRING: ");
+        for (int i = 0; i < referenceLength; i++) {
+            referenceString[i] = Integer.parseInt(reader.readLine());
+        }
+        System.out.println();
+
+        // Optimal Page Replacement Algorithm
+        for (int i = 0; i < referenceLength; i++) {
+            int searchIndex = -1;
+            for (int j = 0; j < numFrames; j++) {
+                if (frameBuffer[j] == referenceString[i]) {
+                    searchIndex = j;
+                    hits++;
+                    break;
+                }
+            }
+
+            if (searchIndex == -1) {
+                if (isBufferFull) {
+                    int[] futureUseIndex = new int[numFrames];
+                    boolean[] isIndexUsed = new boolean[numFrames];
+                    for (int j = i + 1; j < referenceLength; j++) {
+                        for (int k = 0; k < numFrames; k++) {
+                            if ((referenceString[j] == frameBuffer[k]) && (!isIndexUsed[k])) {
+                                futureUseIndex[k] = j;
+                                isIndexUsed[k] = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    int maxIndex = futureUseIndex[0];
+                    pointer = 0;
+                    if (maxIndex == 0) maxIndex = Integer.MAX_VALUE;
+
+                    for (int j = 0; j < numFrames; j++) {
+                        if (futureUseIndex[j] == 0) futureUseIndex[j] = Integer.MAX_VALUE;
+                        if (futureUseIndex[j] > maxIndex) {
+                            maxIndex = futureUseIndex[j];
+                            pointer = j;
+                        }
+                    }
+                }
+
+                frameBuffer[pointer] = referenceString[i];
+                faults++;
+
+                if (!isBufferFull) {
+                    pointer++;
+                    if (pointer == numFrames) {
+                        pointer = 0;
+                        isBufferFull = true;
+                    }
+                }
+            }
+
+            // Update the memory layout for the current reference
+            for (int j = 0; j < numFrames; j++) {
+                memoryLayout[i][j] = frameBuffer[j];
+            }
+        }
+
+        // Display the memory layout
+        for (int i = 0; i < numFrames; i++) {
+            for (int j = 0; j < referenceLength; j++) {
+                System.out.printf("%3d ", memoryLayout[j][i]);
+            }
+            System.out.println();
+        }
+
+        // Display hit and fault statistics
+        System.out.println("\nTOTAL NUMBER OF HITS: " + hits);
+        System.out.println("\nHIT RATIO: " + (float) hits / referenceLength);
+        System.out.println("\nTOTAL NUMBER OF PAGE FAULTS: " + faults);
+    }
+}

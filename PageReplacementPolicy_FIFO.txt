@@ -1,0 +1,71 @@
+import java.io.*;
+
+class FirstInFirstOutPageReplacement {
+    public static void main(String args[]) throws IOException {
+        // Initialize variables
+        int numInputs, numFrames;
+        float hitRatio;
+
+        // Set up reader for input
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        // Read number of frames from user
+        System.out.println("Enter the number of FRAMES:");
+        numFrames = Integer.parseInt(reader.readLine());
+
+        // Initialize frame array
+        int[] frames = new int[numFrames];
+
+        // Read number of page inputs from user
+        System.out.println("Enter the number of INPUTS:");
+        numInputs = Integer.parseInt(reader.readLine());
+
+        // Initialize input array
+        int[] pageInputs = new int[numInputs];
+
+        // Read page inputs from user
+        System.out.println("Enter INPUT:");
+        for (int i = 0; i < numInputs; i++) {
+            pageInputs[i] = Integer.parseInt(reader.readLine());
+        }
+
+        // Initialize frames to -1 representing empty
+        System.out.println("----------------------");
+        for (int i = 0; i < numFrames; i++) {
+            frames[i] = -1;
+        }
+
+        // Initialize hit and fault counters
+        int hits = 0;
+        int faults = 0;
+
+        // FIFO algorithm implementation
+        int pointer = 0; // To keep track of the oldest frame
+        boolean isHit; // Flag to check if page hit occurs
+
+        for (int i = 0; i < numInputs; i++) {
+            isHit = false;
+
+            // Check if the page is already in one of the frames
+            for (int k = 0; k < numFrames; k++) {
+                if (frames[k] == pageInputs[i]) {
+                    isHit = true;
+                    hits++;
+                }
+            }
+
+            // If it's a miss, replace the oldest frame with new page
+            if (!isHit) {
+                frames[pointer] = pageInputs[i];
+                pointer = (pointer + 1) % numFrames; // Move pointer to the next oldest frame
+                faults++;
+            }
+        }
+
+        // Calculate hit ratio
+        hitRatio = (float) hits / numInputs;
+
+        // Output the results
+        System.out.println("HITS: " + hits + "  FAULTS: " + faults + "   HIT RATIO: " + hitRatio);
+    }
+}
