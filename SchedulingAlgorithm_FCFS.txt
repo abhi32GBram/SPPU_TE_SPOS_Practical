@@ -1,0 +1,71 @@
+import java.util.Scanner;
+
+// Renamed class to reflect the scheduling algorithm used
+class FirstComeFirstServeScheduling {
+
+    public static void main(String[] args) {
+        // Declare arrays to hold process information
+        int[] processIds = new int[20];
+        int[] executionTimes = new int[20];
+        int[] startTimes = new int[20];
+        int[] waitTimes = new int[20];
+        int[] turnaroundTimes = new int[20];
+        
+        // Variables to hold total wait time and total turnaround time
+        int totalWaitTime = 0;
+        int totalTurnaroundTime = 0;
+        
+        // Variables to hold average wait time and average turnaround time
+        float averageWaitTime, averageTurnaroundTime;
+        
+        // Scanner object for user input
+        Scanner scanner = new Scanner(System.in);
+        
+        // Prompt user for the number of processes
+        System.out.print("\nEnter the number of processes: ");
+        int numberOfProcesses = scanner.nextInt();
+        
+        // Input process IDs and execution times
+        for (int i = 0; i < numberOfProcesses; i++) {
+            System.out.println();
+            System.out.print("Enter the process ID of process " + (i + 1) + ": ");
+            processIds[i] = scanner.nextInt();
+            System.out.print("Enter the execution time of process " + (i + 1) + ": ");
+            executionTimes[i] = scanner.nextInt();
+        }
+        
+        // Calculate the start time for each process
+        startTimes[0] = 0;
+        for (int i = 1; i < numberOfProcesses; i++) {
+            startTimes[i] = startTimes[i - 1] + executionTimes[i - 1];
+        }
+        
+        // Calculate wait time for each process and total wait time
+        waitTimes[0] = 0;
+        for (int i = 0; i < numberOfProcesses; i++) {
+            waitTimes[i] = startTimes[i] - processIds[i];
+            totalWaitTime += waitTimes[i];
+        }
+        
+        // Calculate turnaround time for each process and total turnaround time
+        for (int i = 0; i < numberOfProcesses; i++) {
+            turnaroundTimes[i] = waitTimes[i] + executionTimes[i];
+            totalTurnaroundTime += turnaroundTimes[i];
+        }
+        
+        // Calculate average wait time and average turnaround time
+        averageWaitTime = (float) totalWaitTime / numberOfProcesses;
+        averageTurnaroundTime = (float) totalTurnaroundTime / numberOfProcesses;
+        
+        // Print process details and average times
+        System.out.println("\nProcess_ID\tExecution_Time\tStart_Time\tWait_Time\tTurnaround_Time");
+        for (int i = 0; i < numberOfProcesses; i++) {
+            System.out.println(processIds[i] + "\t\t" + executionTimes[i] + "\t\t" + startTimes[i] + "\t\t" + waitTimes[i] + "\t\t" + turnaroundTimes[i]);
+        }
+        
+        System.out.println("\nAverage Turnaround Time: " + averageTurnaroundTime + "\nAverage Wait Time: " + averageWaitTime);
+        
+        // Close the scanner
+        scanner.close();
+    }
+}

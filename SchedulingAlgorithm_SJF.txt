@@ -1,0 +1,90 @@
+import java.util.Scanner;
+
+class ShortestJobFirstNonPreemptive {
+    public static void main(String[] args) {
+        // Initialize arrays to hold process information
+        int[] processId = new int[20];
+        int[] executionTime = new int[20];
+        int[] startTime = new int[20];
+        int[] waitTime = new int[20];
+        int[] burstTime = new int[20];
+        int[] completionTime = new int[20];
+        int[] isComplete = new int[20]; // Flag to check if the process is completed
+        int[] turnaroundTime = new int[20];
+
+        // Variables to hold total processes completed and system time
+        int totalProcessesCompleted = 0;
+        int systemTime = 0;
+
+        // Variables to hold average wait time and turnaround time
+        float averageWaitTime = 0, averageTurnaroundTime = 0;
+
+        // Scanner object for user input
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("\nEnter the number of processes: ");
+        int numProcesses = scanner.nextInt();
+
+        // Input process IDs and execution times
+        for (int i = 0; i < numProcesses; i++) {
+            System.out.println();
+            System.out.print("Enter the process ID of process " + (i + 1) + ": ");
+            processId[i] = scanner.nextInt();
+            System.out.print("Enter the execution time of process " + (i + 1) + ": ");
+            executionTime[i] = scanner.nextInt();
+            burstTime[i] = executionTime[i]; // Copy of execution times for calculation
+            isComplete[i] = 0; // Initialize process completion flags
+        }
+
+        // Process scheduling loop
+        while (true) {
+            int min = 9999, currentProcess = numProcesses;
+            if (totalProcessesCompleted == numProcesses) {
+                break; // All processes are completed
+            }
+
+            // Find the process with the shortest execution time
+            for (int i = 0; i < numProcesses; i++) {
+                if ((processId[i] <= systemTime) && (isComplete[i] == 0) && (executionTime[i] < min)) {
+                    min = executionTime[i];
+                    currentProcess = i;
+                }
+            }
+
+            // If no process is found, increment system time
+            if (currentProcess == numProcesses) {
+                systemTime++;
+            } else {
+                // Process the found process
+                executionTime[currentProcess]--;
+                systemTime++;
+                // If process is completed
+                if (executionTime[currentProcess] == 0) {
+                    completionTime[currentProcess] = systemTime;
+                    isComplete[currentProcess] = 1;
+                    totalProcessesCompleted++;
+                }
+            }
+        }
+
+        // Calculate turnaround time and wait time for each process
+        for (int i = 0; i < numProcesses; i++) {
+            turnaroundTime[i] = completionTime[i] - processId[i];
+            waitTime[i] = turnaroundTime[i] - burstTime[i];
+            averageWaitTime += waitTime[i];
+            averageTurnaroundTime += turnaroundTime[i];
+        }
+
+        // Print process details
+        System.out.println("\nProcess_ID\tBurst_Time\tCompletion_Time\tWait_Time\tTurnaround_Time");
+        for (int i = 0; i < numProcesses; i++) {
+            System.out.println(processId[i] + "\t\t" + burstTime[i] + "\t\t" + completionTime[i] + "\t\t" + waitTime[i] + "\t\t" + turnaroundTime[i]);
+        }
+
+        // Print average wait time and turnaround time
+        System.out.println("\nAverage Wait Time: " + (averageWaitTime / numProcesses));
+        System.out.println("Average Turnaround Time: " + (averageTurnaroundTime / numProcesses));
+
+        // Close the scanner
+        scanner.close();
+    }
+}

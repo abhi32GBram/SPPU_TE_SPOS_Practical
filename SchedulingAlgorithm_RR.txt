@@ -1,0 +1,107 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+class RoundRobinScheduling {
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+
+        // Prompt for and read the time quantum
+        System.out.println("Enter the Time Quantum: ");
+        int timeQuantum = Integer.parseInt(bufferedReader.readLine());
+
+        // Prompt for and read the number of processes
+        System.out.println("Please enter the number of Processes: ");
+        int numberOfProcesses = Integer.parseInt(bufferedReader.readLine());
+
+        // Process table where proc[i][0] - Arrival Time (AT), proc[i][1] - Remaining Time (RT),
+        // proc[i][2] - Waiting Time (WT), proc[i][3] - Turnaround Time (TT)
+        int[][] processes = new int[numberOfProcesses + 1][4];
+
+        // Input burst times for each process
+        for (int i = 1; i <= numberOfProcesses; i++) {
+            System.out.println("Please enter the Burst Time for Process " + i + ": ");
+            processes[i][1] = Integer.parseInt(bufferedReader.readLine());
+        }
+
+        System.out.println();
+
+        // Calculate total time for all processes and initialize time chart
+        int totalTime = 0;
+        for (int i = 1; i <= numberOfProcesses; i++) {
+            totalTime += processes[i][1];
+        }
+        int[] timeChart = new int[totalTime];
+
+        // Variables to keep track of the process selection and current quantum
+        int selectedProcess = 1;
+        int currentQuantum = 0;
+
+        // Execution loop
+        for (int currentTime = 0; currentTime < totalTime; currentTime++) {
+            // Assign the selected process to the current time in the chart
+            timeChart[currentTime] = selectedProcess;
+
+            // Decrement the remaining time for the selected process
+            processes[selectedProcess][1]--;
+
+            // Calculate waiting time and turnaround time for each process
+            for (int j = 1; j <= numberOfProcesses; j++) {
+                if (processes[j][1] != 0) {
+                    processes[j][3]++; // Increment TT for all non-completed processes
+                    if (j != selectedProcess) {
+                        processes[j][2]++; // Increment WT for all waiting processes
+                    }
+                } else if (j == selectedProcess) {
+                    processes[j][3]++; // Special case: increment TT for the currently running process
+                }
+            }
+
+            // Print the time chart for the processes
+            if (currentTime != 0) {
+                if (selectedProcess != timeChart[currentTime - 1]) {
+                    System.out.print("--" + currentTime + "--P" + selectedProcess);
+                }
+            } else {
+                System.out.print(currentTime + "--P" + selectedProcess);
+            }
+
+            // Print the end time after all processes have been charted
+            if (currentTime == totalTime - 1) {
+                System.out.print("--" + (currentTime + 1));
+            }
+
+            // Update the selected process for the next iteration
+            currentQuantum++;
+            if (currentQuantum == timeQuantum || processes[selectedProcess][1] == 0) {
+                currentQuantum = 0;
+                // Select the next process that still has remaining time
+                for (int j = 1; j <= numberOfProcesses; j++) {
+                    selectedProcess++;
+                    if (selectedProcess == (numberOfProcesses + 1)) {
+                        selectedProcess = 1;
+                    }
+                    if (processes[selectedProcess][1] != 0) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        System.out.println("\n\nP\t WT  \t TT  ");
+        // Calculate and print waiting time and turnaround time for each process
+        float averageWaitingTime = 0, averageTurnaroundTime = 0;
+        for (int i = 1; i <= numberOfProcesses; i++) {
+            System.out.printf("%d\t%3dms\t%3dms\n", i, processes[i][2], processes[i][3]);
+            averageWaitingTime += processes[i][2];
+            averageTurnaroundTime += processes[i][3];
+        }
+
+        // Calculate and print average waiting time and turnaround time
+        averageWaitingTime /= numberOfProcesses;
+        averageTurnaroundTime /= numberOfProcesses;
+        System.out.println("\nThe Average Waiting Time is: " + averageWaitingTime + "ms");
+        System.out.println("The Average Turnaround Time is: " + averageTurnaroundTime + "ms");
+    }
+}
